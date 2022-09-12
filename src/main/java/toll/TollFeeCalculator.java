@@ -27,7 +27,7 @@ public class TollFeeCalculator {
         int totalFee = 0;
         LocalDateTime intervalStart = dates[0];
         for(LocalDateTime date: dates) {
-            System.out.println(date.toString());
+            System.out.println(date.toString() + " " + getTollFeePerPassing(date));
             long diffInMinutes = intervalStart.until(date, ChronoUnit.MINUTES);
             if(diffInMinutes > 60) {
                 totalFee += getTollFeePerPassing(date);
@@ -36,7 +36,7 @@ public class TollFeeCalculator {
                 totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));
             }
         }
-        return Math.max(totalFee, 60);
+        return Math.min(totalFee, 60);
     }
 
     public static int getTollFeePerPassing(LocalDateTime date) {
@@ -60,6 +60,6 @@ public class TollFeeCalculator {
     }
 
     public static void main(String[] args) {
-        new TollFeeCalculator("src/test/resources/Lab4.txt");
+        new TollFeeCalculator("src/test/resources/Lab5.txt");
     }
 }
