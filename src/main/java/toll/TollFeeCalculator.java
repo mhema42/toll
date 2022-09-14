@@ -9,11 +9,11 @@ import java.util.Scanner;
 
 public class TollFeeCalculator {
 
-    public TollFeeCalculator(String inputFile) {
-        try {
+    public TollFeeCalculator(String inputFile) { 	
+    	try {
             Scanner sc = new Scanner(new File(inputFile));
             String[] dateStrings = sc.nextLine().split(", ");
-            LocalDateTime[] dates = new LocalDateTime[dateStrings.length-1];
+            LocalDateTime[] dates = new LocalDateTime[dateStrings.length/* bugfix - removed "-1" */];
             for(int i = 0; i < dates.length; i++) {
                 dates[i] = LocalDateTime.parse(dateStrings[i], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             }
@@ -27,6 +27,7 @@ public class TollFeeCalculator {
         int totalFee = 0;
         LocalDateTime intervalStart = dates[0];
         for(LocalDateTime date: dates) {
+        	// mine
             System.out.println(date.toString() + " " + getTollFeePerPassing(date));
             long diffInMinutes = intervalStart.until(date, ChronoUnit.MINUTES);
             if(diffInMinutes > 60) {
@@ -35,7 +36,9 @@ public class TollFeeCalculator {
             } else {
                 totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));
             }
+            
         }
+        // bugfix - changed Math.max -> Math.min
         return Math.min(totalFee, 60);
     }
 
@@ -47,7 +50,8 @@ public class TollFeeCalculator {
         else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
         else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
         else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-        else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
+        // bugfix - changed "else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;" to row below
+        else if (hour >= 8 && minute >= 30 || hour >= 9 && minute >= 00 && hour <= 14  && minute <= 59) return 8;
         else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
         else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
         else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
