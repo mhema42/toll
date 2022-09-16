@@ -40,11 +40,11 @@ public class TollFeeCalculator {
                 totalFee += getTollFeePerPassing(date);
                 intervalStart = date;
             } else {
+                // Bugfix - changed "totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));" to if statement below 
             	if(getTollFeePerPassing(date) >= getTollFeePerPassing(intervalStart) ) {
             		totalFee -= getTollFeePerPassing(intervalStart);
             		totalFee += getTollFeePerPassing(date);
             	}
-                // totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));      
             }
             
         }
