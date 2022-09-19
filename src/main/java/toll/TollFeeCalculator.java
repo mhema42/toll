@@ -2,18 +2,23 @@ package toll;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.PublicKey;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 
 public class TollFeeCalculator {
+	
+	public LocalDateTime[] dates;
 
     public TollFeeCalculator(String inputFile) {
-        try {
+    	try {
             Scanner sc = new Scanner(new File(inputFile));
             String[] dateStrings = sc.nextLine().split(", ");
-            LocalDateTime[] dates = new LocalDateTime[dateStrings.length-1];
+            dates = new LocalDateTime[dateStrings.length /* bugfix - removed "-1" */ ];
             for(int i = 0; i < dates.length; i++) {
                 dates[i] = LocalDateTime.parse(dateStrings[i], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             }
@@ -23,20 +28,27 @@ public class TollFeeCalculator {
         }
     }
 
-    public static int getTotalFeeCost(LocalDateTime[] dates) {
-        int totalFee = 0;
+    public static int getTotalFeeCost(LocalDateTime[] dates) {   	
+    	int totalFee = 0;
+    	int previousFee = 0;
         LocalDateTime intervalStart = dates[0];
         for(LocalDateTime date: dates) {
-            System.out.println(date.toString());
+            System.out.println(date.toString() + " " + getTollFeePerPassing(date));
             long diffInMinutes = intervalStart.until(date, ChronoUnit.MINUTES);
-            if(diffInMinutes > 60) {
+            if(diffInMinutes > 60 || diffInMinutes == 0) {
                 totalFee += getTollFeePerPassing(date);
                 intervalStart = date;
             } else {
-                totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));
+                // Bugfix - changed "totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));" to if statement below 
+            	if(getTollFeePerPassing(date) >= getTollFeePerPassing(intervalStart) ) {
+            		totalFee += getTollFeePerPassing(date);
+            		totalFee -= previousFee;
+            	}     	
             }
+            previousFee = getTollFeePerPassing(date);
         }
-        return Math.max(totalFee, 60);
+        // bugfix - changed Math.max -> Math.min
+        return Math.min(totalFee, 60);
     }
 
     public static int getTollFeePerPassing(LocalDateTime date) {
@@ -47,7 +59,8 @@ public class TollFeeCalculator {
         else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
         else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
         else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-        else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
+        // bugfix - changed "else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;" to row below
+        else if (hour == 8 && minute >= 30 && minute <= 59 || hour >= 9 && minute >= 00 && hour <= 14  && minute <= 59) return 8;
         else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
         else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
         else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
@@ -56,7 +69,9 @@ public class TollFeeCalculator {
     }
 
     public static boolean isTollFreeDate(LocalDateTime date) {
-        return date.getDayOfWeek().getValue() == 6 || date.getDayOfWeek().getValue() == 7 || date.getMonth().getValue() == 7;
+    	// changed to getDayOfWeek() and date.getMonth() for more visual ability
+        return date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY || date.getMonth() == Month.JULY;
+        
     }
 
     public static void main(String[] args) {
