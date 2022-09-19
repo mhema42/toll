@@ -4,11 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.Timestamp;
+import java.security.spec.ECField;
+import java.text.DateFormatSymbols;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Random;
 
+import javax.security.auth.kerberos.KerberosCredMessage;
 import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 import org.junit.jupiter.api.DisplayName;
@@ -17,174 +21,92 @@ import org.junit.jupiter.api.Test;
 /** @author mhema **/
 class TollFeeCalculatorTest {
 	
+	int testYear = 2022;
 	java.time.Month testMonth = Month.SEPTEMBER;
 	int testDay = 16;
 	
-	//  random number for date/time stamp in test
-	Random rand = new Random();
-	private int rand_int1 = rand.nextInt(29);		// random 0 to 29 (minutes)
-	private int rand_int2 = rand.nextInt(29) + 30;	// random 30 to 59 (minutes)
-	private int rand_int3 = rand.nextInt(59);		// random 0 to 59 (minutes)
-	private int rand_int4 = rand.nextInt(5) + 9;	// random 9 to 14 (hours)
-	private int rand_int5 = rand.nextInt(5) + 19;	// random 19 to 24 (hours)
-	private int rand_int6 = rand.nextInt(4) + 1;	// random 1 to 5 (hours)
-	private int rand_int7 = rand.nextInt(24);		// random 1 to 24 (hours)
-	private int rand_int8 = rand.nextInt(31);		// random 1 to 31 (days)
-	
 	// fee for different time stamp
-	private int fee1 = 8; 	// between 06.00 to 06.29
-	private int fee2 = 13; 	// between 06.30 to 06.59
-	private int fee3 = 18; 	// between 07.00 to 06.59
-	private int fee4 = 13; 	// between 08.00 to 08.29
-	private int fee5 = 8; 	// between 08.30 to 14.59
-	private int fee6 = 13; 	// between 15.00 to 15.29
-	private int fee7 = 18;	// between 15.30 to 16.59
-	private int fee8 = 13; 	// between 17.00 to 17.59
-	private int fee9 = 8;	// between 18.00 to 18.29
+	private int fee01 = 8; 	// between 06.00 to 06.29
+	private int fee02 = 13; // between 06.30 to 06.59
+	private int fee03 = 18; // between 07.00 to 07.59
+	private int fee04 = 13; // between 08.00 to 08.29
+	private int fee05 = 8; 	// between 08.30 to 14.59
+	private int fee06 = 13; // between 15.00 to 15.29
+	private int fee07 = 18;	// between 15.30 to 16.59
+	private int fee08 = 13; // between 17.00 to 17.59
+	private int fee09 = 8;	// between 18.00 to 18.29
 	private int fee10 = 0;	// between 18.30 to 05.59
 	
-	
-	
-	
+	int endCases[] = {
+		06, 00, fee01, 06, 29, fee01,
+		06, 30, fee02, 06, 59, fee02,
+		07, 00, fee03, 07, 59, fee03,
+		 8, 00, fee04,  8, 29, fee04,
+		 8, 30, fee05, 14, 59, fee05,
+		15, 00, fee06, 15, 29, fee06,
+		15, 30, fee07, 16, 59, fee07,
+		17, 00, fee08, 17, 59, fee08,
+		18, 00, fee09, 18, 29, fee09,
+		18, 30, fee10, 18, 59, fee10,
+ 	};
 	
 	@Test
+	@DisplayName("Test if dates.length has equal length to number of time stamps in textfile")
 	void testTollFeeCalculator() {
 		TollFeeCalculator tf = new TollFeeCalculator("src/test/resources/Lab4.txt");
 		assertEquals(10, tf.dates.length);
-		//System.out.println(tf.dates.length);
-		
-		//fail("Not yet implemented");
-	}
-
-	@Test 
-	@DisplayName("Test between 06.00 to 06.29")
-	void testGetTotalFeeCost01() {
-//		int hour = 6;
-//		int minute = 0;
-//		
-//		int hours[] = new int[];
-//		hour
-				
-		
-		// for(i = 0, i >= )
-		
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 6, 0); 	// test endcase #1
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 6, 29);		// test endcase #2
-        date[2] = LocalDateTime.of(2022, testMonth, testDay, 6, rand_int1);	// test random case within parameters
-        assertEquals(fee1*3, TollFeeCalculator.getTotalFeeCost(date));
-	}
-	
-	@Test 
-	@DisplayName("Test between 06.30 to 06.59")
-	void testGetTotalFeeCost02() {
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 6, 30);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 6, 59);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, 6, rand_int2);
-        assertEquals(fee2*3, TollFeeCalculator.getTotalFeeCost(date));
-	}
-        
-	@Test 
-	@DisplayName("Test between 07.00 to 06.59")
-	void testGetTotalFeeCost03() {
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 7, 00); 
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 7, 59);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, 7, rand_int3);
-        assertEquals(fee3*3, TollFeeCalculator.getTotalFeeCost(date));
-	}
-        
-	@Test 
-	@DisplayName("Test between 08.00 to 08.29")
-	void testGetTotalFeeCost04() {
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 8, 0);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 8, 29);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, 8, rand_int1);
-        assertEquals(fee4*3, TollFeeCalculator.getTotalFeeCost(date));
-	}
-	
-	@Test // This was previous a bug in program
-	@DisplayName("Test between 08.30 to 14.59")
-	void testGetTotalFeeCost05() {
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 8, 30);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 14, 59);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, rand_int4, rand_int3);
-        assertEquals(fee5*3, TollFeeCalculator.getTotalFeeCost(date));
-	}
-
-	@Test
-	@DisplayName("Test between 15.00 to 15.29")
-	void testGetTotalFeeCost06() {
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 15, 00);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 15, 29);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, 15, rand_int1);
-        assertEquals(fee6*3, TollFeeCalculator.getTotalFeeCost(date));
 	}
 	
 	@Test
-	@DisplayName("Test between 15.30 to 16.59")
-	void testGetTotalFeeCost07() {
+	@DisplayName("Test if only highest fee is returned, if time between time stamp is within 60min")
+	void testGetTotalFeeCost01() {	
 		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 15, 30);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 16, 59);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, 16, rand_int3);
-        assertEquals(fee7*3, TollFeeCalculator.getTotalFeeCost(date));
+		date[0] = LocalDateTime.of(testYear, testMonth, testDay, 6, 29); 	// fee 8, not counted because smaller and within 60min of next time stamp
+		date[1] = LocalDateTime.of(testYear, testMonth, testDay, 6, 59); 	// fee 13, not counted because smaller and within 60min of next time stamp
+		date[2] = LocalDateTime.of(testYear, testMonth, testDay, 7, 29); 	// fee 18, counted because larger fee than previous
+        assertEquals(18, TollFeeCalculator.getTotalFeeCost(date));
 	}
 	
 	@Test
-	@DisplayName("Test between 17.00 to 17.59")
-	void testGetTotalFeeCost08() {
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 17, 00);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 17, 59);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, 17, rand_int3);
-        assertEquals(fee8*3, TollFeeCalculator.getTotalFeeCost(date));
-	}
-	
-	@Test
-	@DisplayName("Test between 18.00 to 18.29")
-	void testGetTotalFeeCost09() {
-		LocalDateTime[] date = new LocalDateTime[3];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 18, 00);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 18, 29);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, 18, rand_int1);
-        assertEquals(fee9*3, TollFeeCalculator.getTotalFeeCost(date));
-	}
-	
-	@Test
-	@DisplayName("Test between 18.30 to 05.59")
-	void testGetTotalFeeCost10() {
+	@DisplayName("Test if fee is 60 even if total fee is > 60")
+	void testGetTotalFeeCost02() {	
 		LocalDateTime[] date = new LocalDateTime[4];
-		date[0] = LocalDateTime.of(2022, testMonth, testDay, 18, 30);
-		date[1] = LocalDateTime.of(2022, testMonth, testDay, 5, 59);
-		date[2] = LocalDateTime.of(2022, testMonth, testDay, rand_int5, rand_int3);
-		date[3] = LocalDateTime.of(2022, testMonth, testDay, rand_int6, rand_int3);
-        assertEquals(fee10*4, TollFeeCalculator.getTotalFeeCost(date));
+		date[0] = LocalDateTime.of(testYear, testMonth, testDay, 6, 30); 	// fee 13
+		date[1] = LocalDateTime.of(testYear, testMonth, testDay, 7, 59);	// fee 18
+		date[2] = LocalDateTime.of(testYear, testMonth, testDay, 15, 00);	// fee 13
+		date[3] = LocalDateTime.of(testYear, testMonth, testDay, 16, 01);	// fee 18
+        assertEquals(60, TollFeeCalculator.getTotalFeeCost(date)); 			// sum of fee is 62, but returns 60 as parameters says
 	}
-      
+
+	@Test
+	@DisplayName("Test if correct fee is returned at each end case for time stamps")
+	void testGetTotalFeeCost03() {			
+		for(int i = 0; i < endCases.length; i += 3) {
+			LocalDateTime[] date = new LocalDateTime[1];
+			date[0] = LocalDateTime.of(testYear, testMonth, testDay, endCases[i], endCases[i+1]);
+			int fee = endCases[i+2];
+	        assertEquals(fee, TollFeeCalculator.getTotalFeeCost(date));
+		}
+	}
 	
-	/** Test method for {@link toll.TollFeeCalculator#getTollFeePerPassing(java.time.LocalDateTime)}. */
 	@Test
-	void testGetTollFeePerPassing() {
-		//fail("Not yet implemented");
+	@DisplayName("Test if isTollFreeDate is true for july wich is a toll free month")
+	void isTollFreeDate1() {
+		LocalDateTime date = LocalDateTime.of(2022, Month.JULY, 1, 12, 00);
+		assertEquals(true, TollFeeCalculator.isTollFreeDate(date));
 	}
-
-	/** Test method for {@link toll.TollFeeCalculator#isTollFreeDate(java.time.LocalDateTime)}.	 */
+	
 	@Test
-	void testIsTollFreeDate1() {
-		LocalDateTime[] date = new LocalDateTime[1];
-		date[0] = LocalDateTime.of(2022, Month.JULY, rand_int8, rand_int7, rand_int3);
-        assertEquals(0, TollFeeCalculator.getTotalFeeCost(date));
-		//System.out.println(date[0].getMonth());
+	@DisplayName("Test if isTollFreeDate is true for saturday wich is a toll free day")
+	void isTollFreeDate2() {
+		LocalDateTime date = LocalDateTime.of(2022, Month.SEPTEMBER, 24, 12, 00);
+		assertEquals(true, TollFeeCalculator.isTollFreeDate(date));
 	}
-
-	/** Test method for {@link toll.TollFeeCalculator#main(java.lang.String[])}. */
+	
 	@Test
-	void testMain() {
-		//fail("Not yet implemented");
+	@DisplayName("Test if isTollFreeDate is true for sunday wich is a toll free day")
+	void isTollFreeDate3() {
+		LocalDateTime date = LocalDateTime.of(2022, Month.SEPTEMBER, 25, 12, 00);
+		assertEquals(true, TollFeeCalculator.isTollFreeDate(date));
 	}
 }

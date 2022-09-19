@@ -2,6 +2,7 @@ package toll;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.PublicKey;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -11,7 +12,6 @@ import java.util.Scanner;
 
 public class TollFeeCalculator {
 	
-	// 
 	public LocalDateTime[] dates;
 
     public TollFeeCalculator(String inputFile) {
@@ -28,25 +28,24 @@ public class TollFeeCalculator {
         }
     }
 
-    public static int getTotalFeeCost(LocalDateTime[] dates) {
-        int totalFee = 0;
+    public static int getTotalFeeCost(LocalDateTime[] dates) {   	
+    	int totalFee = 0;
+    	int previousFee = 0;
         LocalDateTime intervalStart = dates[0];
         for(LocalDateTime date: dates) {
-        	// my line below
             System.out.println(date.toString() + " " + getTollFeePerPassing(date));
             long diffInMinutes = intervalStart.until(date, ChronoUnit.MINUTES);
-            System.out.println(diffInMinutes);
-            if(diffInMinutes > 60) {
+            if(diffInMinutes > 60 || diffInMinutes == 0) {
                 totalFee += getTollFeePerPassing(date);
                 intervalStart = date;
             } else {
                 // Bugfix - changed "totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));" to if statement below 
             	if(getTollFeePerPassing(date) >= getTollFeePerPassing(intervalStart) ) {
-            		totalFee -= getTollFeePerPassing(intervalStart);
             		totalFee += getTollFeePerPassing(date);
-            	}
+            		totalFee -= previousFee;
+            	}     	
             }
-            
+            previousFee = getTollFeePerPassing(date);
         }
         // bugfix - changed Math.max -> Math.min
         return Math.min(totalFee, 60);
