@@ -25,31 +25,6 @@ class TollFeeCalculatorTest {
 	java.time.Month testMonth = Month.SEPTEMBER;
 	int testDay = 16;
 	
-	// fee for different time stamp
-	private int fee01 = 8; 	// between 06.00 to 06.29
-	private int fee02 = 13; // between 06.30 to 06.59
-	private int fee03 = 18; // between 07.00 to 07.59
-	private int fee04 = 13; // between 08.00 to 08.29
-	private int fee05 = 8; 	// between 08.30 to 14.59
-	private int fee06 = 13; // between 15.00 to 15.29
-	private int fee07 = 18;	// between 15.30 to 16.59
-	private int fee08 = 13; // between 17.00 to 17.59
-	private int fee09 = 8;	// between 18.00 to 18.29
-	private int fee10 = 0;	// between 18.30 to 05.59
-	
-	int endCases[] = {
-		06, 00, fee01, 06, 29, fee01,
-		06, 30, fee02, 06, 59, fee02,
-		07, 00, fee03, 07, 59, fee03,
-		 8, 00, fee04,  8, 29, fee04,
-		 8, 30, fee05, 14, 59, fee05,
-		15, 00, fee06, 15, 29, fee06,
-		15, 30, fee07, 16, 59, fee07,
-		17, 00, fee08, 17, 59, fee08,
-		18, 00, fee09, 18, 29, fee09,
-		18, 30, fee10, 18, 59, fee10,
- 	};
-	
 	@Test
 	@DisplayName("Test if dates.length has equal length to number of time stamps in textfile")
 	void testTollFeeCalculator() {
@@ -80,7 +55,31 @@ class TollFeeCalculatorTest {
 
 	@Test
 	@DisplayName("Test if correct fee is returned at each end case for time stamps")
-	void testGetTotalFeeCost03() {			
+	void testGetTotalFeeCost03() {
+		
+		int endCases[] = {
+				6, 00, 8, 	//	end case start - hour, minutes, fee,
+				6, 29, 8,	//	end case finish - hour, minutes, fee,
+				6, 30, 13, 
+				6, 59, 13,
+				7, 00, 18, 
+				7, 59, 18,
+				8, 00, 13,  
+				8, 29, 13,
+				8, 30, 8, 
+				14, 59, 8,
+				15, 00, 13, 
+				15, 29, 13,
+				15, 30, 18, 
+				16, 59, 18,
+				17, 00, 13, 
+				17, 59, 13,
+				18, 00, 8, 
+				18, 29, 8,
+				18, 30, 0, 
+				18, 59, 0
+		};
+		
 		for(int i = 0; i < endCases.length; i += 3) {
 			LocalDateTime[] date = new LocalDateTime[1];
 			date[0] = LocalDateTime.of(testYear, testMonth, testDay, endCases[i], endCases[i+1]);
